@@ -59,9 +59,9 @@
 // all columns.
 //
 // For now, show all columns by default
-static int DefaultShownColumns[] = { COLUMN_PROJECT, COLUMN_PROGRESS, COLUMN_STATUS, 
+static int DefaultShownColumns[] = { COLUMN_PROJECT, COLUMN_PROGRESS, COLUMN_STATUS,
                                 COLUMN_CPUTIME, COLUMN_TOCOMPLETION,
-                                COLUMN_REPORTDEADLINE, COLUMN_APPLICATION, 
+                                COLUMN_REPORTDEADLINE, COLUMN_APPLICATION,
                                 COLUMN_NAME};
 
 // groups that contain buttons
@@ -107,8 +107,9 @@ BEGIN_EVENT_TABLE (CViewWork, CBOINCBaseView)
     EVT_BUTTON(ID_TASK_WORK_ABORT, CViewWork::OnWorkAbort)
     EVT_BUTTON(ID_TASK_SHOW_PROPERTIES, CViewWork::OnShowItemProperties)
     EVT_BUTTON(ID_TASK_ACTIVE_ONLY, CViewWork::OnActiveTasksOnly)
+    EVT_BUTTON(ID_TASK_FILTERBY_PROJECT, CViewWork::OnTasksByProject)
     EVT_CUSTOM_RANGE(wxEVT_COMMAND_BUTTON_CLICKED, ID_TASK_PROJECT_WEB_PROJDEF_MIN, ID_TASK_PROJECT_WEB_PROJDEF_MAX, CViewWork::OnProjectWebsiteClicked)
-// We currently handle EVT_LIST_CACHE_HINT on Windows or 
+// We currently handle EVT_LIST_CACHE_HINT on Windows or
 // EVT_CHECK_SELECTION_CHANGED on Mac & Linux instead of EVT_LIST_ITEM_SELECTED
 // or EVT_LIST_ITEM_DESELECTED.  See CBOINCBaseView::OnCacheHint() for info.
 #if USE_LIST_CACHE_HINT
@@ -127,7 +128,7 @@ static bool CompareViewWorkItems(int iRowIndex1, int iRowIndex2) {
     CWork*          work1;
     CWork*          work2;
     int             result = false;
-    
+
     try {
         work1 = myCViewWork->m_WorkCache.at(iRowIndex1);
     } catch ( std::out_of_range ) {
@@ -265,7 +266,7 @@ CViewWork::CViewWork(wxNotebook* pNotebook) :
     m_aStdColNameOrder->Insert(_("Deadline"), COLUMN_REPORTDEADLINE);
     m_aStdColNameOrder->Insert(_("Application"), COLUMN_APPLICATION);
     m_aStdColNameOrder->Insert(_("Name"), COLUMN_NAME);
-    
+
     // m_iStdColWidthOrder is an array of the width for each column.
     // Entries must be in order of ascending Column ID.  We initalize
     // it here to the default column widths.  It is updated by
@@ -390,7 +391,7 @@ wxString CViewWork::GetKeyValue2(int iRowIndex) {
         // Column is hidden, so SynchronizeCacheItem() did not set its value
         GetDocProjectURL(m_iSortedIndexes[iRowIndex], work->m_strProjectURL);
     }
-    
+
     return work->m_strProjectURL;
 }
 
@@ -447,7 +448,7 @@ void CViewWork::OnWorkSuspend( wxCommandEvent& WXUNUSED(event) ) {
         // Step through all selected items
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
         if (row < 0) break;
-        
+
         RESULT* result = pDoc->result(m_iSortedIndexes[row]);
         if (result) {
             if (result->suspended_via_gui) {
@@ -484,7 +485,7 @@ void CViewWork::OnWorkShowGraphics( wxCommandEvent& WXUNUSED(event) ) {
         // Step through all selected items
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
         if (row < 0) break;
-        
+
         result = pDoc->result(m_iSortedIndexes[row]);
         if (result) {
             pDoc->WorkShowGraphics(result);
@@ -517,7 +518,7 @@ void CViewWork::OnWorkShowVMConsole( wxCommandEvent& WXUNUSED(event) ) {
         // Step through all selected items
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
         if (row < 0) break;
-        
+
         result = pDoc->result(m_iSortedIndexes[row]);
         if (result) {
             pDoc->WorkShowVMConsole(result);
@@ -552,7 +553,7 @@ void CViewWork::OnWorkAbort( wxCommandEvent& WXUNUSED(event) ) {
         return;
 
     n = m_pListPane->GetSelectedItemCount();
-    
+
     if (n == 1) {
         row = -1;
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
@@ -561,7 +562,7 @@ void CViewWork::OnWorkAbort( wxCommandEvent& WXUNUSED(event) ) {
             return;
         }
         strMessage.Printf(
-           _("Are you sure you want to abort this task '%s'?\n(Progress: %s, Status: %s)"), 
+           _("Are you sure you want to abort this task '%s'?\n(Progress: %s, Status: %s)"),
            (work->m_strName).c_str(),
            (work->m_strProgress).c_str(),
            (work->m_strStatus).c_str()
@@ -586,7 +587,7 @@ void CViewWork::OnWorkAbort( wxCommandEvent& WXUNUSED(event) ) {
         // Step through all selected items
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
         if (row < 0) break;
-        
+
         RESULT* result = pDoc->result(m_iSortedIndexes[row]);
         if (result) {
             pDoc->WorkAbort(result->project_url, result->name);
@@ -707,7 +708,7 @@ wxInt32 CViewWork::GetDocCount() {
 wxString CViewWork::OnListGetItemText(long item, long column) const {
     CWork*    work      = NULL;
     wxString  strBuffer = wxEmptyString;
-    
+
     m_pListPane->AddPendingProgressBar(item);
 
     try {
@@ -731,8 +732,8 @@ wxString CViewWork::OnListGetItemText(long item, long column) const {
                 strBuffer = work->m_strCPUTime;
                 break;
             case COLUMN_PROGRESS:
-                // CBOINCListCtrl::DrawProgressBars() will draw this using 
-                // data provided by GetProgressText() and GetProgressValue(), 
+                // CBOINCListCtrl::DrawProgressBars() will draw this using
+                // data provided by GetProgressText() and GetProgressValue(),
                 // but we need it here for accessibility programs.
                 strBuffer = work->m_strProgress;
                 break;
@@ -747,7 +748,7 @@ wxString CViewWork::OnListGetItemText(long item, long column) const {
                 break;
         }
     }
-    
+
     return strBuffer;
 }
 
@@ -863,7 +864,7 @@ void CViewWork::UpdateSelection() {
         // Step through all selected items
         row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
         if (row < 0) break;     // Should never happen
-        
+
         result = pDoc->result(m_iSortedIndexes[row]);
         if (!result) continue;
         if (i == 0) {
@@ -912,7 +913,7 @@ void CViewWork::UpdateSelection() {
                 enableShowGraphics = false;
             }
         }
-        
+
         // Disable Show VM console if the selected task hasn't registered a remote
         // desktop connection
         //
@@ -927,19 +928,19 @@ void CViewWork::UpdateSelection() {
         }
 
         if (result->suspended_via_gui ||
-            result->project_suspended_via_gui || 
+            result->project_suspended_via_gui ||
             (result->scheduler_state != CPU_SCHED_SCHEDULED)
         ) {
             if (!isGFXRunning) {
                 enableShowGraphics = false;
             }
         }
-       
+
         // Disable Abort button if any selected task already aborted
         if (
             result->active_task_state == PROCESS_ABORT_PENDING ||
             result->active_task_state == PROCESS_ABORTED ||
-            result->state == RESULT_ABORTED 
+            result->state == RESULT_ABORTED
         ) {
             enableAbort = false;
         }
@@ -952,7 +953,7 @@ void CViewWork::UpdateSelection() {
                 all_same_project = false;
             }
         }
-        
+
         if (n == 1) {
             enableProperties = true;
         }
@@ -1004,9 +1005,9 @@ bool CViewWork::SynchronizeCacheItem(wxInt32 iRowIndex, wxInt32 iColumnIndex) {
      if (GetWorkCacheAtIndex(work, m_iSortedIndexes[iRowIndex])) {
         return false;
     }
-    
+
     if (iColumnIndex < 0) return false;
-    
+
     switch (m_iColumnIndexToColumnID[iColumnIndex]) {
         case COLUMN_PROJECT:
             GetDocProjectName(m_iSortedIndexes[iRowIndex], strDocumentText);
@@ -1130,7 +1131,7 @@ void CViewWork::GetDocApplicationName(wxInt32 item, wxString& strBuffer) const {
         } else {
             strAppBuffer = HtmlEntityDecode(wxString(state_result->avp->app_name, wxConvUTF8));
         }
-        
+
         if (strlen(avp->plan_class)) {
             strClassBuffer.Printf(
                 wxT(" (%s)"),
@@ -1294,7 +1295,7 @@ double CViewWork::GetProgressValue(long item) {
 wxString CViewWork::GetProgressText( long item) {
     CWork*    work      = NULL;
     wxString  strBuffer = wxEmptyString;
-    
+
     if (GetWorkCacheAtIndex(work, m_iSortedIndexes[item])) {
         strBuffer = wxEmptyString;
     } else {
@@ -1312,7 +1313,7 @@ int CViewWork::GetWorkCacheAtIndex(CWork*& workPtr, int index) {
         workPtr = NULL;
         return -1;
     }
-    
+
     return 0;
 }
 
