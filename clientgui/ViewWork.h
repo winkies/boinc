@@ -74,10 +74,11 @@ public:
     void                    OnWorkAbort( wxCommandEvent& event );
     void                    OnShowItemProperties( wxCommandEvent& event );
     void                    OnActiveTasksOnly( wxCommandEvent& event );
+    void                    OnTasksByProject( wxCommandEvent& event );
 
     void                    OnProjectWebsiteClicked( wxEvent& event );
     void                    OnColResize( wxListEvent& event);
-    
+
     std::vector<CWork*>     m_WorkCache;
 
 protected:

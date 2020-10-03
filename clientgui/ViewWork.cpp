@@ -70,11 +70,12 @@ static int DefaultShownColumns[] = { COLUMN_PROJECT, COLUMN_PROGRESS, COLUMN_STA
 
 // buttons in the "tasks" area
 #define BTN_ACTIVE_ONLY             0
-#define BTN_GRAPHICS                1
-#define BTN_VMCONSOLE               2
-#define BTN_SUSPEND                 3
-#define BTN_ABORT                   4
-#define BTN_PROPERTIES              5
+#define BTN_FILTER_BY               1
+#define BTN_GRAPHICS                2
+#define BTN_VMCONSOLE               3
+#define BTN_SUSPEND                 4
+#define BTN_ABORT                   5
+#define BTN_PROPERTIES              6
 
 
 CWork::CWork() {
@@ -211,42 +212,49 @@ CViewWork::CViewWork(wxNotebook* pNotebook) :
     pItem = new CTaskItem(
         _("Show active tasks"),
         _("Show only active tasks."),
-        ID_TASK_ACTIVE_ONLY 
+        ID_TASK_ACTIVE_ONLY
+    );
+    pGroup->m_Tasks.push_back( pItem );
+
+    pItem = new CTaskItem(
+        _("Show this project"),
+        _("Show all tasks from this project."),
+        ID_TASK_FILTERBY_PROJECT
     );
     pGroup->m_Tasks.push_back( pItem );
 
     pItem = new CTaskItem(
         _("Show graphics"),
         _("Show application graphics in a window."),
-        ID_TASK_WORK_SHOWGRAPHICS 
+        ID_TASK_WORK_SHOWGRAPHICS
     );
     pGroup->m_Tasks.push_back( pItem );
 
     pItem = new CTaskItem(
         _("Show VM Console"),
         _("Show VM Console in a window."),
-        ID_TASK_WORK_VMCONSOLE 
+        ID_TASK_WORK_VMCONSOLE
     );
     pGroup->m_Tasks.push_back( pItem );
 
     pItem = new CTaskItem(
         _("Suspend"),
         _("Suspend work for this result."),
-        ID_TASK_WORK_SUSPEND 
+        ID_TASK_WORK_SUSPEND
     );
     pGroup->m_Tasks.push_back( pItem );
 
     pItem = new CTaskItem(
         _("Abort"),
         _("Abandon work on the result. You will get no credit for it."),
-        ID_TASK_WORK_ABORT 
+        ID_TASK_WORK_ABORT
     );
     pGroup->m_Tasks.push_back( pItem );
 
     pItem = new CTaskItem(
         _("Properties"),
         _("Show task details."),
-        ID_TASK_SHOW_PROPERTIES 
+        ID_TASK_SHOW_PROPERTIES
     );
     pGroup->m_Tasks.push_back( pItem );
 
@@ -426,6 +434,34 @@ void CViewWork::OnActiveTasksOnly( wxCommandEvent& WXUNUSED(event) ) {
     pFrame->FireRefreshView();
 
     wxLogTrace(wxT("Function Start/End"), wxT("CViewWork::OnActiveTasksOnly - Function End"));
+}
+
+
+void CViewWork::OnTasksByProject( wxCommandEvent& WXUNUSED(event)) {
+    wxLogTrace(wxT("Function Start/End"), wxT("CViewWork::OnTasksByProject - Function Begin"));
+
+    CMainDocument* pDoc     = wxGetApp().GetDocument();
+    CAdvancedFrame* pFrame  = wxDynamicCast(GetParent()->GetParent()->GetParent(), CAdvancedFrame);
+    int row;
+    MESSAGE* message;
+
+    wxASSERT(pDoc);
+    wxASSERT(wxDynamicCast(pDoc, CMainDocument));
+    wxASSERT(pFrame);
+    wxASSERT(wxDynamicCast(pFrame, CAdvancedFrame));
+    wxASSERT(m_pTaskPane);
+    wxASSERT(m_pListPane);
+
+    // Get row selected
+    row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
+
+    // Get message or result ?
+    message = wxGetApp().GetDocument()->message(row);
+    fprintf(stdout, "Project == %s", message->project);
+    syslog(LOG_INFO|LOG_ERR, "%s", message->project);
+
+    // loop on all row to get only selected project
+    wxLogTrace(wxT("Function Start/End"), wxT("CViewWork::OnTasksByProject - Function End"));
 }
 
 
@@ -816,6 +852,7 @@ void CViewWork::UpdateSelection() {
     bool                enableSuspendResume = false;
     bool                enableAbort = false;
     bool                enableProperties = false;
+    bool                enableFilterBy = false;
 
     wxASSERT(NULL != pDoc);
     wxASSERT(wxDynamicCast(pDoc, CMainDocument));
@@ -824,14 +861,15 @@ void CViewWork::UpdateSelection() {
     CBOINCBaseView::PreUpdateSelection();
 
     pGroup = m_TaskGroups[0];
-    
+
     n = m_pListPane->GetSelectedItemCount();
     if (n > 0) {
         enableShowGraphics = true;
         enableShowVMConsole = true;
         enableSuspendResume = true;
         enableAbort = true;
-        
+        enableFilterBy = true;
+
         pDoc->GetCoreClientStatus(status);
         if (status.task_suspend_reason & ~(SUSPEND_REASON_CPU_THROTTLE)) {
             enableShowGraphics = false;
@@ -972,6 +1010,7 @@ void CViewWork::UpdateSelection() {
             m_pTaskPane->FitInside();
         };
     }
+    pGroup->m_Tasks[BTN_FILTER_BY]->m_pButton->Enable(enableFilterBy);
     pGroup->m_Tasks[BTN_SUSPEND]->m_pButton->Enable(enableSuspendResume);
     pGroup->m_Tasks[BTN_ABORT]->m_pButton->Enable(enableAbort);
     pGroup->m_Tasks[BTN_PROPERTIES]->m_pButton->Enable(enableProperties);
