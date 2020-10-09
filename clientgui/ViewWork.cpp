@@ -442,8 +442,8 @@ void CViewWork::OnTasksByProject( wxCommandEvent& WXUNUSED(event)) {
 
     CMainDocument* pDoc     = wxGetApp().GetDocument();
     CAdvancedFrame* pFrame  = wxDynamicCast(GetParent()->GetParent()->GetParent(), CAdvancedFrame);
-    int row;
-    MESSAGE* message;
+    int row = -1;
+    wxString    strProjectName  = wxEmptyString;
 
     wxASSERT(pDoc);
     wxASSERT(wxDynamicCast(pDoc, CMainDocument));
@@ -455,12 +455,30 @@ void CViewWork::OnTasksByProject( wxCommandEvent& WXUNUSED(event)) {
     // Get row selected
     row = m_pListPane->GetNextItem(row, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 
-    // Get message or result ?
-    message = wxGetApp().GetDocument()->message(row);
-    fprintf(stdout, "Project == %s", message->project);
-    syslog(LOG_INFO|LOG_ERR, "%s", message->project);
+    // Get project name of selected item
+    GetDocProjectName(row, strProjectName);
+
+    wxString projectRef = strProjectName;
+    int value = 0;
+    int total = GetDocCount();
 
     // loop on all row to get only selected project
+    for (row = 0; row < total; row++) {
+      GetDocProjectName(row, strProjectName);
+        if (strRef.IsSameAs(strProjectName)) {
+          value++;
+      }
+    }
+
+    // wxString Foobar;
+    // Foobar.Printf( wxT("Hello I have %d tasks."), value);
+    // wxMessageBox(Foobar);
+
+    pDoc->m_TasksByProject = !pDoc->m_TasksByProject;
+    UpdateSelection(); // update button
+
+    pFrame->FireRefreshView(); // update frame / display
+
     wxLogTrace(wxT("Function Start/End"), wxT("CViewWork::OnTasksByProject - Function End"));
 }
 
