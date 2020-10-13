@@ -465,7 +465,7 @@ void CViewWork::OnTasksByProject( wxCommandEvent& WXUNUSED(event)) {
     // loop on all row to get only selected project
     for (row = 0; row < total; row++) {
       GetDocProjectName(row, strProjectName);
-        if (strRef.IsSameAs(strProjectName)) {
+        if (projectRef.IsSameAs(strProjectName)) {
           value++;
       }
     }
@@ -912,6 +912,20 @@ void CViewWork::UpdateSelection() {
             pGroup->m_Tasks[BTN_ACTIVE_ONLY],
             _("Show active tasks"),
             _("Show only active tasks.")
+        );
+    }
+
+    if (pDoc->m_TasksByProject) {
+      m_pTaskPane->UpdateTask(
+         pGroup->m_Tasks[BTN_FILTER_BY],
+            _("Show all tasks"),
+            _("Show all tasks.")
+        );
+    } else {
+        m_pTaskPane->UpdateTask(
+            pGroup->m_Tasks[BTN_FILTER_BY],
+            _("Show only this project"),
+            _("Show tasks from only this project.")
         );
     }
 
