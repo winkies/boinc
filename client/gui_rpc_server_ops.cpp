@@ -136,7 +136,7 @@ static void handle_get_simple_gui_info(GUI_RPC_CONN& grc) {
         PROJECT* p = gstate.projects[i];
         p->write_state(grc.mfout, true);
     }
-    gstate.write_tasks_gui(grc.mfout, true);
+    gstate.write_tasks_gui(grc.mfout, true, "");
     grc.mfout.printf("</simple_gui_info>\n");
 }
 
@@ -1286,11 +1286,14 @@ static void handle_get_old_results(GUI_RPC_CONN& grc) {
 
 static void handle_get_results(GUI_RPC_CONN& grc) {
     bool active_only = false;
+    std::string project_name = "";
+
     while (!grc.xp.get_tag()) {
-        if (grc.xp.parse_bool("active_only", active_only)) continue;
+        if (grc.xp.parse_bool("active_only", active_only)
+            && grc.xp.parse_string("project_name", project_name)) continue;
     }
     grc.mfout.printf("<results>\n");
-    gstate.write_tasks_gui(grc.mfout, active_only);
+    gstate.write_tasks_gui(grc.mfout, active_only, project_name);
     grc.mfout.printf("</results>\n");
 }
 

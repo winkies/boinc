@@ -690,7 +690,7 @@ struct RPC_CLIENT {
     int authorize(const char* passwd);
     int exchange_versions(std::string client_name, VERSION_INFO& server);
     int get_state(CC_STATE&);
-    int get_results(RESULTS&, bool active_only = false);
+    int get_results(RESULTS&, bool active_only = false, const std::string& project_name = "");
     int get_old_results(std::vector<OLD_RESULT>&);
     int get_file_transfers(FILE_TRANSFERS&);
     int get_simple_gui_info(SIMPLE_GUI_INFO&);

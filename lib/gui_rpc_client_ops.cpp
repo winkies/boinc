@@ -1486,7 +1486,7 @@ int RPC_CLIENT::get_state(CC_STATE& state) {
     return state.parse(rpc.xp);
 }
 
-int RPC_CLIENT::get_results(RESULTS& t, bool active_only) {
+int RPC_CLIENT::get_results(RESULTS& t, bool active_only, const std::string& project_name) {
     int retval;
     SET_LOCALE sl;
     char buf[256];
@@ -1494,8 +1494,9 @@ int RPC_CLIENT::get_results(RESULTS& t, bool active_only) {
 
     t.clear();
 
-    sprintf(buf, "<get_results>\n<active_only>%d</active_only>\n</get_results>\n",
-        active_only?1:0
+    sprintf(buf, "<get_results>\n<active_only>%d</active_only>\n<project_name>%s</project_name>\n</get_results>\n",
+            active_only?1:0,
+            project_name
     );
     retval = rpc.do_rpc(buf);
     if (!retval) {

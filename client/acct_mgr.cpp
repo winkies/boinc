@@ -257,7 +257,7 @@ int ACCT_MGR_OP::do_rpc(ACCT_MGR_INFO& _ami, bool _via_gui) {
     //
     if (ami.send_tasks_all || ami.send_tasks_active) {
         mf.printf("<results>\n");
-        gstate.write_tasks_gui(mf, !ami.send_tasks_all);
+        gstate.write_tasks_gui(mf, !ami.send_tasks_all, "");
         mf.printf("</results>\n");
     }
 #endif

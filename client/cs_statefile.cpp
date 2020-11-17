@@ -1047,7 +1047,7 @@ int CLIENT_STATE::write_state_gui(MIOFILE& f) {
     return 0;
 }
 
-int CLIENT_STATE::write_tasks_gui(MIOFILE& f, bool active_only) {
+int CLIENT_STATE::write_tasks_gui(MIOFILE& f, bool active_only, const std::string& project_name) {
     unsigned int i;
 
     if (active_only) {
@@ -1055,7 +1055,17 @@ int CLIENT_STATE::write_tasks_gui(MIOFILE& f, bool active_only) {
             RESULT* rp = active_tasks.active_tasks[i]->result;
             rp->write_gui(f);
         }
-    } else {
+    }
+    else if (!project_name.empty()) {
+      for (i=0; i<results.size(); i++) {
+        RESULT *rp = results[i];
+
+        if (!project_name.compare(results[i]->project->get_project_name())) {
+          rp->write_gui(f);
+        }
+      }
+    }
+    else {
         for (i=0; i<results.size(); i++) {
             RESULT* rp = results[i];
             rp->write_gui(f);

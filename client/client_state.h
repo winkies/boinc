@@ -469,7 +469,7 @@ struct CLIENT_STATE {
     int parse_app_info(PROJECT*, FILE*);
     int write_state_gui(MIOFILE&);
     int write_file_transfers_gui(MIOFILE&);
-    int write_tasks_gui(MIOFILE&, bool);
+    int write_tasks_gui(MIOFILE&, bool, const std::string&);
     void sort_results();
     void sort_projects_by_name();
 
